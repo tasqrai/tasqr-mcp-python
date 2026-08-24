@@ -42,7 +42,7 @@ dependencies = [
     "httpx2>=2.5,<3",
     "anyio>=4.0,<5",
     "boto3>=1.34,<2",
-    "cryptography>=42,<50",
+    "cryptography>=42,<51",
 ]
 
 [project.optional-dependencies]
