@@ -1,0 +1,31 @@
+{
+  "generator": "tasqr-mcp-node",
+  "dek_b64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "org_id": "fixture-org-0000-4000-8000-000000000000",
+  "cases": [
+    {
+      "task_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "field": "title",
+      "plaintext": "cross-port title ✓ café",
+      "marker": "{\"__tasqr_enc__\":2,\"n\":\"5wL7SPXPXS4ZYaUE\",\"ct\":\"70Tt+oIoOjHScSBYwJGwCu22tnP8YXo0TAaY+9XDSPCFGQhOD4nk42uk\"}"
+    },
+    {
+      "task_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "field": "description",
+      "plaintext": "line1\nline2",
+      "marker": "{\"__tasqr_enc__\":2,\"n\":\"g8pfxQUDk3RFBLFE\",\"ct\":\"HGQqEvGdVYyNrNjpOYVxP6tLJi9jfkYlq50a\"}"
+    },
+    {
+      "task_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "field": "note",
+      "plaintext": "closed: all good",
+      "marker": "{\"__tasqr_enc__\":2,\"n\":\"2B7LncSCcdvilkuo\",\"ct\":\"m8tyTQdO/a50OfiO2n2WcmJrxpXR/u0Ajw9h6wEnNKM=\"}"
+    },
+    {
+      "task_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "field": "metadata",
+      "plaintext": "{\"k\":1,\"nested\":{\"x\":true}}",
+      "marker": "{\"__tasqr_enc__\":2,\"n\":\"zeWw9R+1ShG6EMb3\",\"ct\":\"SfddmagxEoo60xp7ac1B4jl9RsALBlPxIhWD52+Q530PleMqo4qEvH6PWA==\"}"
+    }
+  ]
+}

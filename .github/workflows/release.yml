@@ -1,0 +1,87 @@
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The lowest entry must match requires-python in pyproject.toml.
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: pytest
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"  # newest supported; the wheel is py3-none-any
+
+      # A tag that disagrees with pyproject.toml would publish a version nobody
+      # asked for, and PyPI filenames are immutable — so fail before building.
+      # Skipped on a plain tag push, which never publishes (see the publish job):
+      # the ref is only required to name the version when we are about to upload
+      # under it. On a dispatch this is the gate that forces running from the tag.
+      - name: Tag must match project version
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          version="$(python -c 'import tomllib,pathlib; print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["version"])')"
+          if [ "$tag" != "$version" ]; then
+            echo "::error::ref '${GITHUB_REF_NAME}' does not name pyproject.toml version ${version}."
+            echo "::error::Run this workflow FROM THE TAG (v${version}), not from a branch."
+            exit 1
+          fi
+
+      - run: pip install build
+      - run: python -m build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  # PUBLISHING IS MANUAL, ON PURPOSE (2026-08-13).
+  #
+  # A `v*` tag is how .mcp.json's proxy pin is moved (llm_task_tracker eadc1eb),
+  # so tagging is a routine act — but this workflow publishes to PyPI, which is a
+  # LAUNCH step, and PyPI filenames are immutable. Those two must not be the same
+  # gesture. On 2026-08-12 they were: pushing a pin tag started this job, and it
+  # only failed to publish because trusted publishing was not configured yet.
+  # That is luck, not a control.
+  #
+  # So a tag push still runs the tests and the build below (useful validation of a
+  # release candidate) and stops there. Publishing needs an explicit
+  # Actions -> release -> "Run workflow".
+  #
+  # GitHub's own gate for this is a required reviewer on the `pypi` environment,
+  # which is unavailable here: protection rules need a paid plan for private
+  # repos, and the tasqrai org is free. This is the equivalent control, and it is
+  # better in one respect — it lives in git, so it is reviewable and greppable
+  # rather than sitting invisibly in repo settings.
+  #
+  # RUN IT FROM THE TAG, not from main: the build job's version check reads
+  # GITHUB_REF_NAME, so dispatching from a branch fails closed before upload.
+  publish:
+    if: github.event_name == 'workflow_dispatch'
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write # mint the OIDC token PyPI trades for an upload grant
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

@@ -1,0 +1,86 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tasqr-mcp"
+version = "0.1.0"
+description = "Tasqr MCP server — task state management for AI agents"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Tasqr", email = "hello@tasqr.ai" }]
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries",
+]
+keywords = ["mcp", "model-context-protocol", "tasks", "agents", "tasqr"]
+# Every runtime dependency is capped at its next major, enforced by
+# tests/test_dependency_bounds.py. `uvx --from git+…` ignores uv.lock and resolves
+# fresh on every launch, so an uncapped floor means the next major release of any
+# dep ships itself to every user the day it lands — which is exactly how mcp 2.0
+# broke every launch (`streamablehttp_client` was renamed out from under us).
+# Raising a cap is then a deliberate commit with the migration in it.
+#
+# mcp 2.x only — no 1.x compatibility path, and there shouldn't be one: uvx and
+# Homebrew users always get the newest release, and a dual-SDK proxy would double
+# the surface of the one component that handles plaintext task data before
+# encryption. httpx2 (not httpx) is the HTTP stack: mcp 2.x requires it, so our own
+# calls use it too and the tree carries one client library rather than two.
+# The JS proxy needs no equivalent change — `^1.0.0` already bounds it, and the JS
+# SDK has no 2.x.
+dependencies = [
+    "mcp>=2,<3",
+    "httpx2>=2.5,<3",
+    "anyio>=4.0,<5",
+    "boto3>=1.34,<2",
+    "cryptography>=42,<50",
+]
+
+[project.optional-dependencies]
+# Dev tooling is deliberately uncapped — it never reaches a user's launch, and a
+# stale pytest/ruff pin costs more than it saves.
+dev = ["pytest>=8", "anyio[trio]>=4", "moto[kms]>=5", "httpx2>=2.5", "ruff>=0.9"]
+
+[project.urls]
+Homepage = "https://tasqr.ai"
+Repository = "https://github.com/tasqrai/tasqr-mcp-python"
+
+[project.scripts]
+tasqr-mcp = "tasqr_mcp.__main__:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tasqr_mcp"]
+
+[tool.hatch.build.targets.sdist]
+# CLAUDE.md is internal engineering notes and .github is release plumbing —
+# keep both out of the public sdist (and therefore out of the Homebrew build,
+# which is downstream of the sdist).
+exclude = ["CLAUDE.md", ".github"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # import sorting
+    "UP",  # pyupgrade
+    "B",   # bugbear
+    "SIM", # simplify
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests lean on long inline fixtures, and stacked patch() contexts read better nested
+# than collapsed into one statement.
+"tests/*" = ["E501", "SIM117"]

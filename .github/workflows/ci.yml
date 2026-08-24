@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"  # newest supported; the wheel is py3-none-any
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The lowest entry must match requires-python in pyproject.toml.
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: pytest
+
+  # Same build the release runs, minus the publish — so a broken sdist/wheel
+  # surfaces on push rather than on the tag we can't take back.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"  # newest supported; the wheel is py3-none-any
+      - run: pip install build
+      - run: python -m build
+      - name: Internal docs must not ship in the sdist
+        run: |
+          if tar tzf dist/*.tar.gz | grep -E 'CLAUDE\.md|\.github/'; then
+            echo "::error::sdist contains files that should be excluded"
+            exit 1
+          fi

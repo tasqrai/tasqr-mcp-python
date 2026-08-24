@@ -1,0 +1,15 @@
+{
+  "_comment": "Canary for the fail-open crypto tables. Both ports' tables are keyed by server tool name and silently encrypt/decrypt NOTHING for an unrecognized name, so a server-side tool rename that isn't mirrored here ships plaintext without any test failing. This fixture pins the exact table contents; it is checked into BOTH repos byte-for-byte (tests/fixtures/crypto_tool_tables.json) and asserted against each port's tables. A server tool rename must update the server, this fixture in both repos, and both crypto tables in the same change.",
+  "encrypt_list_tools": {
+    "create_tasks": {
+      "list_key": "tasks",
+      "fields": ["title", "description", "metadata"]
+    },
+    "update_tasks": {
+      "list_key": "updates",
+      "fields": ["title", "description", "metadata", "output", "note"]
+    }
+  },
+  "decrypt_tools": ["claim_next_task", "get_tasks", "list_tasks"],
+  "task_dec_fields": ["title", "description", "metadata", "output"]
+}

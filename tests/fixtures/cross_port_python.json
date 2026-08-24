@@ -1,0 +1,31 @@
+{
+  "generator": "tasqr-mcp-python",
+  "dek_b64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "org_id": "fixture-org-0000-4000-8000-000000000000",
+  "cases": [
+    {
+      "task_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "field": "title",
+      "plaintext": "cross-port title ✓ café",
+      "marker": "{\"__tasqr_enc__\": 2, \"n\": \"7l+QBFsGepO1ygyM\", \"ct\": \"wPhJCtgn3EfcbMTN9+b2NhSRdA8tx50SW+IUDXyXhl/4LmF/xOla4crG\"}"
+    },
+    {
+      "task_id": "aaaaaaaa-0000-4000-8000-000000000001",
+      "field": "description",
+      "plaintext": "line1\nline2",
+      "marker": "{\"__tasqr_enc__\": 2, \"n\": \"b6n4e7md4Qxi9Gbs\", \"ct\": \"2VWsPD7ixcJNhuJC+4NQkbxO4Q1NMsOK7eMH\"}"
+    },
+    {
+      "task_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "field": "note",
+      "plaintext": "closed: all good",
+      "marker": "{\"__tasqr_enc__\": 2, \"n\": \"RGqtSbi9kogMixNI\", \"ct\": \"TGS43zSmPIesQTjZOtVb8OEm/gIAtWKcVWoxQrZ8MAs=\"}"
+    },
+    {
+      "task_id": "bbbbbbbb-0000-4000-8000-000000000002",
+      "field": "metadata",
+      "plaintext": "{\"k\": 1, \"nested\": {\"x\": true}}",
+      "marker": "{\"__tasqr_enc__\": 2, \"n\": \"GE6IzwF2NOTSjevu\", \"ct\": \"2no0xhxxMTxI6CbZB+m7zV0xm8FCS+qJhZ9BTRR0RrAJN7fxpTMrrQOIZHk1568=\"}"
+    }
+  ]
+}
