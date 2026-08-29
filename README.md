@@ -17,6 +17,20 @@ uvx tasqr-mcp        # run once without installing
 pip install tasqr-mcp
 ```
 
+On a Mac, Homebrew is a third option, and the requirement above doesn't apply to
+it — the formula wraps this same sdist in its own virtualenv with its own Python,
+so it shares nothing with any Python you have installed:
+
+```bash
+brew tap tasqrai/tasqr
+brew trust --tap tasqrai/tasqr
+brew install tasqr-mcp
+```
+
+Installed this way the command is plain `tasqr-mcp`, so use that in place of
+`uvx` in the client config below. Full install notes are in the tap,
+[tasqrai/homebrew-tasqr](https://github.com/tasqrai/homebrew-tasqr).
+
 ## MCP client config
 
 ```json
