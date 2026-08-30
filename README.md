@@ -33,16 +33,80 @@ Installed this way the command is plain `tasqr-mcp`, so use that in place of
 
 ## MCP client config
 
+The entry is the same in every client; only where it lives differs. Most clients accept it per project or for every project, and a per-project entry wins where both exist.
+
 ```json
 {
   "mcpServers": {
-    "tasqr": {
-      "command": "uvx",
-      "args": ["tasqr-mcp"]
-    }
+    "tasqr": { "command": "uvx", "args": ["tasqr-mcp"] }
   }
 }
 ```
+
+### Claude Code
+
+The [Tasqr plugin](https://github.com/tasqrai/tasqr-claude-code-plugin) adds this for you (`/plugin marketplace add tasqrai/tasqr-claude-code-plugin`, then `/plugin install tasqr@tasqr`). To add it by hand:
+
+```bash
+claude mcp add --scope project tasqr -- uvx tasqr-mcp   # .mcp.json in the project, shareable via git
+claude mcp add --scope user tasqr -- uvx tasqr-mcp      # ~/.claude.json, every project
+```
+
+### Cursor
+
+`.cursor/mcp.json` in the project, or `~/.cursor/mcp.json` for every project. Cursor › Settings › MCP shows the servers it loaded.
+
+```json
+{
+  "mcpServers": {
+    "tasqr": { "command": "uvx", "args": ["tasqr-mcp"] }
+  }
+}
+```
+
+### Claude Desktop
+
+Settings › Developer › Edit Config opens `claude_desktop_config.json` (`~/Library/Application Support/Claude/` on macOS, `%APPDATA%\Claude\` on Windows). Global only; restart Claude Desktop after saving.
+
+```json
+{
+  "mcpServers": {
+    "tasqr": { "command": "uvx", "args": ["tasqr-mcp"] }
+  }
+}
+```
+
+### Google Antigravity
+
+`.agents/mcp_config.json` in the workspace, or `~/.gemini/config/mcp_config.json` for every workspace (shared by the IDE and the CLI). The agent panel's MCP Servers › Manage MCP Servers › View raw config opens the global file.
+
+```json
+{
+  "mcpServers": {
+    "tasqr": { "command": "uvx", "args": ["tasqr-mcp"] }
+  }
+}
+```
+
+### Amazon Kiro
+
+`.kiro/settings/mcp.json` in the workspace, or `~/.kiro/settings/mcp.json` for every workspace. The command palette has "Kiro: Open workspace MCP config (JSON)" and "Kiro: Open user MCP config (JSON)".
+
+```json
+{
+  "mcpServers": {
+    "tasqr": { "command": "uvx", "args": ["tasqr-mcp"] }
+  }
+}
+```
+
+### Amazon Quick Desktop
+
+Settings › Capabilities › MCP › Add MCP. Either add a local server with the command and arguments from the entry above, or choose Import and point it at a Kiro or Claude Code config file that already contains the entry.
+
+### Anything else
+
+Any MCP client that can launch a stdio server takes the same entry: a command, no URL, no headers, no key.
 
 ## Credentials
 
@@ -121,7 +185,7 @@ Once enrolled, the proxy fetches or generates a data encryption key (DEK), wraps
 
 Every ciphertext is additionally **bound to its context**: the GCM associated data ties each encrypted value to your org, its task, and the field it was written for. A blob moved to any other slot — a different field, task, or org — fails decryption outright instead of decrypting in the wrong place. To make this possible the proxy mints each new task's id itself and sends it with the create call.
 
-See the [client-side encryption guide](https://tasqr.ai/docs#client-encryption) for the full setup walkthrough.
+See the [client-side encryption guide](https://tasqr.ai/docs/concepts#client-encryption) for the full setup walkthrough.
 
 ## Local development
 
