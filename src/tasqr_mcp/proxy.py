@@ -81,6 +81,24 @@ def _handlers(upstream: Client, crypto):
     return on_list_tools, on_call_tool
 
 
+def _server(upstream: Client, crypto) -> Server:
+    """The local stdio server, advertising what the upstream server advertises.
+
+    The server's `instructions` are relayed, not set here: with tool search on, a
+    client sees only tool names and these instructions at session start, so they
+    decide whether a model goes looking for the tools. Relaying keeps the server
+    the one place that text is written — editing it ships with a server deploy,
+    not a client release. Upstream sending none means we advertise none.
+    """
+    on_list_tools, on_call_tool = _handlers(upstream, crypto)
+    return Server(
+        "tasqr-mcp",
+        instructions=upstream.instructions,
+        on_list_tools=on_list_tools,
+        on_call_tool=on_call_tool,
+    )
+
+
 async def _run(api_key: str) -> None:
     cfg = read_config()
     crypto = None
@@ -105,12 +123,7 @@ async def _run(api_key: str) -> None:
         http_client,
         _upstream_client(http_client) as upstream,
     ):
-        on_list_tools, on_call_tool = _handlers(upstream, crypto)
-        server = Server(
-            "tasqr-mcp",
-            on_list_tools=on_list_tools,
-            on_call_tool=on_call_tool,
-        )
+        server = _server(upstream, crypto)
 
         async with stdio_server() as (reader, writer):
             await server.run(
