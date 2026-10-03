@@ -1,0 +1,31 @@
+name: fresh-deps
+
+# Tests the dependency tree a user would get today.
+#
+# `uvx` ignores uv.lock and resolves every launch fresh, so users always run the
+# newest versions inside our ranges. The ci workflow also installs fresh, but only
+# when we push — and the code under test doesn't change between pushes, the index
+# does. This runs the same suite daily so a dependency release that breaks us
+# turns this red before a user's launch is the first report.
+
+on:
+  schedule:
+    - cron: '41 7 * * *' # daily
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # one bad version shouldn't mask the others
+      matrix:
+        python-version: ['3.11', '3.12', '3.13', '3.14'] # keep in step with ci.yml
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install --no-cache-dir --upgrade -e ".[dev]"
+      - name: Record what resolved
+        run: pip list --format=freeze | grep -iE '^(mcp|httpx2|anyio|boto3|cryptography)=='
+      - run: pytest
