@@ -284,6 +284,26 @@ def test_update_tasks_item_without_task_id_raises():
         c.encrypt_args("update_tasks", {"updates": [{"title": "no id"}]})
 
 
+@pytest.mark.parametrize(
+    ("tool", "list_key", "item"),
+    [
+        ("update_tasks", "updates", {"task_id": TID, "output": "a string"}),
+        ("update_tasks", "updates", {"task_id": TID, "metadata": ["not", "an", "object"]}),
+        ("create_tasks", "tasks", {"title": "t", "description": "d", "metadata": "a string"}),
+    ],
+)
+def test_non_object_metadata_or_output_raises(tool, list_key, item):
+    """The server rejects a non-object metadata/output for managed orgs, but for a
+    BYOK org it only sees the ciphertext marker (an object), so a string would be
+    accepted and stored. The proxy enforces the same rule, with the server's wording."""
+    from tasqr_mcp.crypto import ClientCryptoError
+
+    c = make_crypto()
+    field = "output" if "output" in item else "metadata"
+    with pytest.raises(ClientCryptoError, match=rf"{list_key}\[0\]: '{field}' must be an object"):
+        c.encrypt_args(tool, {list_key: [item]})
+
+
 # ── decrypt paths ─────────────────────────────────────────────────────────────
 
 

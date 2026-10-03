@@ -163,6 +163,13 @@ class ClientCrypto:
             for i, item in enumerate(items):
                 if isinstance(item, dict):
                     item = dict(item)
+                    # The server rejects a non-object metadata/output, but it only ever
+                    # sees our ciphertext marker (always an object), so for a BYOK org
+                    # the check has to happen here or a string is silently accepted.
+                    for field in ("metadata", "output"):
+                        value = item.get(field) if field in fields else None
+                        if value is not None and not isinstance(value, dict):
+                            raise ClientCryptoError(f"{list_key}[{i}]: '{field}' must be an object")
                     if tool_name == "create_tasks" and not item.get("task_id"):
                         item["task_id"] = str(uuid.uuid4())
                     task_id = item.get("task_id")
